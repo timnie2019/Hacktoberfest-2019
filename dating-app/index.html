@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dating Profile AI — 5 Real-Person Review</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d12;
+      --surface: #16161f;
+      --surface2: #1f1f2e;
+      --text: #ededf5;
+      --muted: #7070a0;
+      --accent: #ff4d7d;
+      --right-color: #3dde8c;
+      --left-color: #ff4545;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      background: linear-gradient(160deg, #12121c 0%, #1a1028 50%, #12121c 100%);
+      border-bottom: 1px solid rgba(255,77,125,0.2);
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .app-header h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff4d7d 0%, #ff9a42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .app-header p { color: var(--muted); font-size: 15px; max-width: 500px; margin: 0 auto; }
+
+    /* ── Layout ── */
+    .container { max-width: 1080px; margin: 0 auto; padding: 28px 16px 60px; }
+
+    /* ── Section Cards ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── API Key ── */
+    .key-row { display: flex; gap: 10px; align-items: center; }
+    .key-row input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      padding: 11px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: monospace;
+    }
+    .key-row input:focus { border-color: var(--accent); }
+    .btn-save {
+      padding: 11px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: 9px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .btn-save:hover { opacity: 0.85; }
+    .key-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+    /* ── Upload + Bio grid ── */
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 640px) { .input-grid { grid-template-columns: 1fr; } }
+
+    /* ── Drop Zone ── */
+    .drop-zone {
+      background: var(--surface);
+      border: 2px dashed rgba(255,77,125,0.25);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(255,77,125,0.04);
+    }
+    .drop-icon { font-size: 36px; margin-bottom: 10px; }
+    .drop-zone h3 { font-size: 15px; margin-bottom: 5px; }
+    .drop-zone p { font-size: 13px; color: var(--muted); }
+
+    .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .photo-thumb {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-thumb .rm {
+      position: absolute;
+      top: 3px; right: 3px;
+      background: rgba(0,0,0,0.75);
+      border: none;
+      color: #fff;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .photo-num {
+      position: absolute;
+      bottom: 3px; left: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    /* ── Bio ── */
+    .bio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+    .bio-card textarea {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 160px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+    .bio-card textarea:focus { border-color: var(--accent); }
+
+    /* ── Evaluate button ── */
+    .btn-evaluate {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #ff4d7d 0%, #ff7a42 100%);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+      transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 4px 24px rgba(255,77,125,0.25);
+    }
+    .btn-evaluate:hover { opacity: 0.92; }
+    .btn-evaluate:active { transform: scale(0.99); }
+    .btn-evaluate:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    /* ── Alerts ── */
+    .alert {
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .alert.error {
+      background: rgba(255,69,69,0.1);
+      border: 1px solid rgba(255,69,69,0.3);
+      color: #ff8888;
+      display: block;
+    }
+    .alert.success {
+      background: rgba(61,222,140,0.1);
+      border: 1px solid rgba(61,222,140,0.3);
+      color: var(--right-color);
+      display: block;
+    }
+
+    /* ── Summary ── */
+    .summary-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 24px;
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .summary-strip.visible { display: flex; }
+    .s-stat { text-align: center; }
+    .s-stat .val { font-size: 32px; font-weight: 700; }
+    .s-stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .s-stat.r .val { color: var(--right-color); }
+    .s-stat.l .val { color: var(--left-color); }
+    .s-stat.score .val { color: #ffd84d; }
+
+    /* ── Agent Grid ── */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: transform 0.18s, border-color 0.3s;
+    }
+    .agent-card:hover { transform: translateY(-3px); }
+    .agent-card.right { border-color: rgba(61,222,140,0.45); }
+    .agent-card.left  { border-color: rgba(255,69,69,0.45); }
+
+    .agent-top {
+      padding: 18px 18px 14px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+    .agent-ava {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .agent-meta h3 { font-size: 16px; font-weight: 600; }
+    .agent-meta .atype { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .swipe-pill {
+      margin-left: auto;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .swipe-pill.right { background: rgba(61,222,140,0.15); color: var(--right-color); border: 1px solid rgba(61,222,140,0.35); }
+    .swipe-pill.left  { background: rgba(255,69,69,0.15);  color: var(--left-color);  border: 1px solid rgba(255,69,69,0.35); }
+    .swipe-pill.wait  { background: rgba(112,112,160,0.15); color: var(--muted); border: 1px solid rgba(112,112,160,0.3); }
+
+    .agent-body { padding: 0 18px 18px; }
+
+    /* Confidence bar */
+    .conf-bar { margin-bottom: 14px; }
+    .conf-bar .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .bar-bg { background: var(--bg); height: 5px; border-radius: 3px; overflow: hidden; }
+    .bar-fg { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
+
+    /* Photo ratings */
+    .ratings-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .r-chip {
+      background: var(--surface2);
+      border-radius: 7px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Feedback quote */
+    .feedback-block {
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #c8c8e0;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 13px 14px;
+      border-left: 3px solid;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    /* Top advice */
+    .advice-block {
+      background: rgba(255,255,255,0.03);
+      border-radius: 9px;
+      padding: 10px 13px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .advice-block strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text); margin-bottom: 4px; }
+
+    /* Photo notes */
+    .photo-notes { margin-bottom: 14px; }
+    .photo-notes .pn-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 7px; }
+    .pn-item { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: #b0b0cc; margin-bottom: 4px; }
+    .pn-item .pn-num { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
+    /* Loading skeleton */
+    .loading-row { display: flex; align-items: center; gap: 12px; padding: 10px 0 4px; }
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,77,125,0.25); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-label { font-size: 13px; color: var(--muted); }
+
+    /* Chat button */
+    .btn-chat {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-chat:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.2); }
+
+    /* ── Chat Modal ── */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(5px);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+      display: none;
+    }
+    .modal-bg.open { display: flex; }
+    @media (min-width: 540px) { .modal-bg { align-items: center; } }
+
+    .chat-panel {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      width: 100%;
+      max-width: 460px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-head {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .chat-head .ch-ava { width: 38px; height: 38px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+    .chat-head .ch-name { font-weight: 600; font-size: 15px; }
+    .chat-head .ch-type { font-size: 11.5px; color: var(--muted); }
+    .chat-close { margin-left: auto; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px; line-height: 1; }
+    .chat-close:hover { color: var(--text); }
+
+    .chat-msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+    }
+    .msg {
+      max-width: 82%;
+      padding: 10px 13px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .msg.agent-msg { background: var(--surface2); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg.user-msg  { background: var(--accent);   align-self: flex-end;   border-bottom-right-radius: 4px; color: #fff; }
+    .msg.typing { opacity: 0.5; font-style: italic; }
+
+    .chat-foot {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 9px;
+    }
+    .chat-foot input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      padding: 10px 13px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .chat-foot input:focus { border-color: var(--accent); }
+    .btn-send {
+      padding: 10px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: 9px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-send:not(:disabled):hover { opacity: 0.85; }
+
+    /* ── Placeholder empty state ── */
+    .empty-card-body { padding: 6px 0 10px; font-size: 13.5px; color: var(--muted); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>💘 Dating Profile AI — 5 Real-Person Review</h1>
+  <p>Upload your photos &amp; bio. 5 simulated real users swipe, rate, and chat with you — powered by Claude.</p>
+</header>
+
+<div class="container">
+
+  <!-- API Key -->
+  <div class="section-card">
+    <div class="section-label">🔑 Anthropic API Key</div>
+    <div class="key-row">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+      <button class="btn-save" onclick="saveApiKey()">Save</button>
+    </div>
+    <p class="key-hint">Stored in your browser only — never sent anywhere except Anthropic's API.</p>
+  </div>
+
+  <!-- Upload + Bio -->
+  <div class="input-grid">
+
+    <!-- Photo drop zone -->
+    <div class="drop-zone" id="dropZone"
+         onclick="document.getElementById('photoInput').click()"
+         ondragover="onDragOver(event)"
+         ondrop="onDrop(event)"
+         ondragleave="onDragLeave(event)">
+      <div class="drop-icon">📷</div>
+      <h3>Upload Profile Photos</h3>
+      <p>Drag &amp; drop or click — up to 6 images</p>
+      <div class="photo-grid" id="photoGrid"></div>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="onFileInput(event)" />
+
+    <!-- Bio -->
+    <div class="bio-card">
+      <div class="section-label" style="margin-bottom:10px">📝 Your Dating App Bio</div>
+      <textarea id="bioInput" placeholder="Paste your dating app bio here...
+
+For example:
+'28 | Software engineer by day, home chef on weekends. Looking for someone to explore the city with and who can keep up with my bad puns. I love hiking, jazz bars, and Succession reruns.'
+
+More detail = better feedback."></textarea>
+    </div>
+
+  </div>
+
+  <div id="alertBox" class="alert"></div>
+
+  <button class="btn-evaluate" id="evaluateBtn" onclick="runEval()">
+    🔥 Get Feedback from All 5 Agents
+  </button>
+
+  <!-- Summary -->
+  <div class="summary-strip" id="summaryStrip">
+    <div class="s-stat r"><div class="val" id="sRight">–</div><div class="lbl">Swiped Right</div></div>
+    <div class="s-stat l"><div class="val" id="sLeft">–</div><div class="lbl">Swiped Left</div></div>
+    <div class="s-stat score"><div class="val" id="sAvg">–</div><div class="lbl">Avg Photo Score</div></div>
+  </div>
+
+  <!-- Agent Cards -->
+  <div class="agents-grid" id="agentsGrid"></div>
+
+</div>
+
+<!-- Chat Modal -->
+<div class="modal-bg" id="chatModal">
+  <div class="chat-panel">
+    <div class="chat-head">
+      <div class="ch-ava" id="chatAva"></div>
+      <div>
+        <div class="ch-name" id="chatName"></div>
+        <div class="ch-type" id="chatType"></div>
+      </div>
+      <button class="chat-close" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-foot">
+      <input type="text" id="chatInput" placeholder="Say something or ask for advice…" onkeydown="if(event.key==='Enter')sendMsg()" />
+      <button class="btn-send" id="sendBtn" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Agent Definitions ─────────────────────────────────────────────────────────
+
+const AGENTS = [
+  {
+    id: 'emma',
+    name: 'Emma',
+    age: 28,
+    type: 'The Picky Professional',
+    emoji: '👩‍💼',
+    color: '#E91E63',
+    bg: 'rgba(233,30,99,0.18)',
+    system: `You are Emma, 28, a marketing director who uses Hinge between meetings. You have high standards — most profiles don't pass. You care about ambition, clear photos that show a real life, and a bio with actual personality. You speak candidly, like a blunt best friend who wants what's best for you.
+
+When evaluating a dating profile (photos + bio):
+• Give a SWIPE decision: LEFT or RIGHT, confidence 60–99%
+• Rate each photo 1–10 (you're tough but fair)
+• Write 3–4 sentences of honest feedback in Emma's first-person voice — what you see, what you feel, why you decided
+• Give exactly one actionable Top Advice
+
+Respond ONLY with valid JSON, no prose outside it:
+{
+  "swipe": "RIGHT"|"LEFT",
+  "confidence": <int 60-99>,
+  "photoRatings": [<int>, ...],
+  "feedback": "<3–4 sentences as Emma>",
+  "topAdvice": "<one concrete tip>"
+}`
+  },
+  {
+    id: 'jake',
+    name: 'Jake',
+    age: 25,
+    type: 'The Casual Scroller',
+    emoji: '😎',
+    color: '#2196F3',
+    bg: 'rgba(33,150,243,0.18)',
+    system: `You are Jake, 25, scrolling Tinder while watching the game. You spend 2 seconds per profile — pure instinct. You want good vibes, fun energy, someone easy-going. You write casually, a little bro-ish but chill — real talk, not harsh.
+
+When evaluating a dating profile:
+• Swipe LEFT or RIGHT, confidence 60–99%
+• Rate each photo 1–10
+• Write 3–4 sentences in Jake's casual, gut-reaction voice — what hit, what missed, overall vibe
+• One chill Top Advice tip
+
+Respond ONLY with valid JSON:
+{
+  "swipe": "RIGHT"|"LEFT",
+  "confidence": <int 60-99>,
+  "photoRatings": [<int>, ...],
+  "feedback": "<3–4 sentences as Jake>",
+  "topAdvice": "<one tip>"
+}`
+  },
+  {
+    id: 'sophia',
+    name: 'Sophia',
+    age: 30,
+    type: 'The Romantic',
+    emoji: '💕',
+    color: '#9C27B0',
+    bg: 'rgba(156,39,176,0.18)',
+    system: `You are Sophia, 30, who deletes apps when she feels nothing. You need authentic connection — you read bios carefully and look for warmth, depth, and realness in photos. You speak with sincere warmth but honest directness, like a wise friend who truly wants you to find love.
+
+When evaluating a dating profile:
+• Swipe LEFT or RIGHT, confidence 60–99%
+• Rate each photo 1–10
+• Write 3–4 sentences in Sophia's warm, perceptive voice — what the profile reveals about who this person is, whether there's connection potential
+• One Top Advice focused on authenticity or emotional signal
+
+Respond ONLY with valid JSON:
+{
+  "swipe": "RIGHT"|"LEFT",
+  "confidence": <int 60-99>,
+  "photoRatings": [<int>, ...],
+  "feedback": "<3–4 sentences as Sophia>",
+  "topAdvice": "<one tip>"
+}`
+  },
+  {
+    id: 'mike',
+    name: 'Mike',
+    age: 27,
+    type: 'The Photo Critic',
+    emoji: '📸',
+    color: '#FF5722',
+    bg: 'rgba(255,87,34,0.18)',
+    system: `You are Mike, 27, who obsesses over his own dating profile photos and immediately notices everything about others — lighting, composition, angle, body language, background clutter, what each photo signals socially. You're direct, technical, constructive, and specific.
+
+When evaluating a dating profile (photo focus, bio secondary):
+• Swipe LEFT or RIGHT, confidence 60–99%
+• Rate each photo 1–10
+• For each photo give a one-phrase note on what's working or failing
+• Write 3–4 sentences in Mike's analytical, photo-focused voice
+• One Top Advice on the single highest-leverage photo change
+
+Respond ONLY with valid JSON:
+{
+  "swipe": "RIGHT"|"LEFT",
+  "confidence": <int 60-99>,
+  "photoRatings": [<int>, ...],
+  "photoNotes": ["<one phrase per photo>", ...],
+  "feedback": "<3–4 sentences as Mike>",
+  "topAdvice": "<one photo tip>"
+}`
+  },
+  {
+    id: 'aiden',
+    name: 'Aiden',
+    age: 29,
+    type: 'The Strategist',
+    emoji: '🎯',
+    color: '#4CAF50',
+    bg: 'rgba(76,175,80,0.18)',
+    system: `You are Aiden, 29, who treats dating apps like a conversion funnel. You've A/B tested your own profile. You think about photo order strategy, bio hooks, signal-to-noise ratio, and match rate. You speak like a consultant who also genuinely dates — analytical but not cold.
+
+When evaluating a dating profile:
+• Swipe LEFT or RIGHT, confidence 60–99%
+• Rate each photo 1–10
+• Write 3–4 sentences in Aiden's strategic voice — what's working, what's costing matches, overall profile strength
+• One high-leverage Top Advice that would move the needle most
+
+Respond ONLY with valid JSON:
+{
+  "swipe": "RIGHT"|"LEFT",
+  "confidence": <int 60-99>,
+  "photoRatings": [<int>, ...],
+  "feedback": "<3–4 sentences as Aiden>",
+  "topAdvice": "<one high-impact tip>"
+}`
+  }
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────────
+
+let photos = [];         // {dataUrl, base64, mimeType}
+let results = {};        // agentId -> result object | 'loading' | null
+let chatAgent = null;    // current open agent
+let chatHistories = {};  // agentId -> [{role,content}]
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('ant_key');
+  if (saved) document.getElementById('apiKeyInput').value = saved;
+  renderCards();
+});
+
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k) return;
+  localStorage.setItem('ant_key', k);
+  showAlert('success', 'API key saved.');
+  setTimeout(clearAlert, 2000);
+}
+
+// ─── Photo handling ────────────────────────────────────────────────────────────
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
+function onDragLeave()  { document.getElementById('dropZone').classList.remove('dragover'); }
+function onDrop(e)      { e.preventDefault(); onDragLeave(); addFiles([...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))); }
+function onFileInput(e) { addFiles([...e.target.files]); e.target.value = ''; }
+
+async function addFiles(files) {
+  for (const f of files) {
+    if (photos.length >= 6) break;
+    const dataUrl = await toDataUrl(f);
+    photos.push({ dataUrl, base64: dataUrl.split(',')[1], mimeType: f.type || 'image/jpeg' });
+  }
+  renderPhotoGrid();
+}
+
+function toDataUrl(file) {
+  return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file); });
+}
+
+function removePhoto(i) { photos.splice(i, 1); renderPhotoGrid(); }
+
+function renderPhotoGrid() {
+  document.getElementById('photoGrid').innerHTML = photos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="Photo ${i+1}" />
+      <button class="rm" onclick="removePhoto(${i});event.stopPropagation()">✕</button>
+      <span class="photo-num">${i+1}</span>
+    </div>
+  `).join('');
+}
+
+// ─── Evaluation ────────────────────────────────────────────────────────────────
+
+async function runEval() {
+  const key = getKey();
+  if (!key)            { showAlert('error', 'Enter your Anthropic API key first.'); return; }
+  if (!photos.length)  { showAlert('error', 'Upload at least one photo.'); return; }
+  clearAlert();
+
+  const btn = document.getElementById('evaluateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Agents are reviewing…';
+
+  results = {};
+  AGENTS.forEach(a => { results[a.id] = 'loading'; });
+  renderCards();
+
+  await Promise.allSettled(AGENTS.map(a => evalAgent(a, key)));
+
+  btn.disabled = false;
+  btn.textContent = '🔄 Re-run Evaluation';
+  renderSummary();
+}
+
+async function evalAgent(agent, key) {
+  try {
+    const imageBlocks = photos.map(p => ({
+      type: 'image',
+      source: { type: 'base64', media_type: p.mimeType, data: p.base64 }
+    }));
+
+    const textBlock = {
+      type: 'text',
+      text: `Here is a dating profile to evaluate.\n\nBio: ${document.getElementById('bioInput').value.trim() || '(no bio provided)'}\n\n${photos.length} photo(s) are attached above. Respond with JSON only.`
+    };
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: agent.system,
+        messages: [{ role: 'user', content: [...imageBlocks, textBlock] }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const raw  = data.content[0].text;
+    let parsed;
+
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      const m = raw.match(/```(?:json)?\s*([\s\S]+?)\s*```/) || raw.match(/(\{[\s\S]+\})/);
+      if (m) parsed = JSON.parse(m[1]);
+      else throw new Error('Response was not valid JSON');
+    }
+
+    results[agent.id] = parsed;
+
+  } catch (e) {
+    results[agent.id] = {
+      swipe: 'LEFT',
+      confidence: 0,
+      photoRatings: [],
+      feedback: `Couldn't get ${agent.name}'s review: ${e.message}`,
+      topAdvice: 'Check your API key and try again.'
+    };
+  }
+
+  // Re-render incrementally as results come in
+  const stillLoading = Object.values(results).some(r => r === 'loading');
+  renderCards(stillLoading);
+}
+
+// ─── Card Rendering ────────────────────────────────────────────────────────────
+
+function renderCards(loading = false) {
+  document.getElementById('agentsGrid').innerHTML = AGENTS.map(a => cardHTML(a, loading)).join('');
+}
+
+function cardHTML(agent, loading) {
+  const r = results[agent.id];
+  const isLoading = r === 'loading';
+  const hasResult = r && r !== 'loading';
+  const swipe = hasResult ? r.swipe : null;
+
+  return `
+    <div class="agent-card ${swipe === 'RIGHT' ? 'right' : swipe === 'LEFT' ? 'left' : ''}">
+      <div class="agent-top">
+        <div class="agent-ava" style="background:${agent.bg}">${agent.emoji}</div>
+        <div class="agent-meta">
+          <h3>${agent.name}, ${agent.age}</h3>
+          <div class="atype">${agent.type}</div>
+        </div>
+        ${swipe
+          ? `<span class="swipe-pill ${swipe.toLowerCase()}">${swipe === 'RIGHT' ? '→ RIGHT' : '← LEFT'}</span>`
+          : isLoading
+            ? `<span class="swipe-pill wait">…</span>`
+            : ''}
+      </div>
+      <div class="agent-body">
+        ${isLoading ? `
+          <div class="loading-row">
+            <div class="spinner"></div>
+            <span class="loading-label">Reviewing your profile…</span>
+          </div>
+        ` : hasResult ? resultHTML(agent, r) : `
+          <p class="empty-card-body">Waiting for you to run the evaluation.</p>
+        `}
+      </div>
+    </div>`;
+}
+
+function resultHTML(agent, r) {
+  const ratings = r.photoRatings || [];
+  const barColor = r.swipe === 'RIGHT' ? 'var(--right-color)' : 'var(--left-color)';
+  const avgRating = ratings.length
+    ? (ratings.reduce((s, x) => s + x, 0) / ratings.length).toFixed(1)
+    : null;
+
+  return `
+    ${r.confidence > 0 ? `
+      <div class="conf-bar">
+        <div class="row"><span>Confidence</span><span>${r.confidence}%</span></div>
+        <div class="bar-bg"><div class="bar-fg" style="width:${r.confidence}%;background:${barColor}"></div></div>
+      </div>
+    ` : ''}
+
+    ${ratings.length ? `
+      <div class="ratings-row">
+        ${ratings.map((v, i) => {
+          const c = v >= 8 ? 'var(--right-color)' : v >= 5 ? '#ffd84d' : 'var(--left-color)';
+          return `<span class="r-chip" style="color:${c}">📷${i+1} · ${v}/10</span>`;
+        }).join('')}
+        ${avgRating ? `<span class="r-chip" style="color:var(--muted)">avg ${avgRating}</span>` : ''}
+      </div>
+    ` : ''}
+
+    ${r.photoNotes?.length ? `
+      <div class="photo-notes">
+        <div class="pn-label">Photo notes</div>
+        ${r.photoNotes.map((n, i) => `
+          <div class="pn-item"><span class="pn-num">📷${i+1}</span>${escHtml(n)}</div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="feedback-block" style="border-left-color:${agent.color}">
+      "${escHtml(r.feedback)}"
+    </div>
+
+    ${r.topAdvice ? `
+      <div class="advice-block">
+        <strong>💡 Top Advice</strong>
+        ${escHtml(r.topAdvice)}
+      </div>
+    ` : ''}
+
+    <button class="btn-chat" onclick="openChat('${agent.id}')">
+      💬 Simulate chat with ${agent.name}
+    </button>
+  `;
+}
+
+function renderSummary() {
+  const valid = Object.values(results).filter(r => r && r !== 'loading' && r.confidence > 0);
+  const rights = valid.filter(r => r.swipe === 'RIGHT').length;
+  const lefts  = valid.filter(r => r.swipe === 'LEFT').length;
+  const allRatings = valid.flatMap(r => r.photoRatings || []);
+  const avg = allRatings.length
+    ? (allRatings.reduce((s, x) => s + x, 0) / allRatings.length).toFixed(1)
+    : '–';
+
+  document.getElementById('sRight').textContent = rights;
+  document.getElementById('sLeft').textContent  = lefts;
+  document.getElementById('sAvg').textContent   = avg;
+  document.getElementById('summaryStrip').classList.add('visible');
+}
+
+// ─── Chat ──────────────────────────────────────────────────────────────────────
+
+function openChat(agentId) {
+  const agent = AGENTS.find(a => a.id === agentId);
+  if (!agent) return;
+  chatAgent = agent;
+
+  document.getElementById('chatAva').textContent   = agent.emoji;
+  document.getElementById('chatAva').style.background = agent.bg;
+  document.getElementById('chatName').textContent  = `${agent.name}, ${agent.age}`;
+  document.getElementById('chatType').textContent  = agent.type;
+  document.getElementById('chatModal').classList.add('open');
+
+  if (!chatHistories[agentId]) {
+    chatHistories[agentId] = [];
+    const r = results[agentId];
+    let opener;
+    if (r && r !== 'loading' && r.confidence > 0) {
+      opener = r.swipe === 'RIGHT'
+        ? `Hey! So I actually would swipe right on you — ${r.feedback.split('.')[0]}. Want to talk through it, or should we just simulate what a match conversation might look like?`
+        : `Hey, honest talk — I'd probably swipe left. ${r.feedback.split('.')[0]}. But I can tell you exactly what to fix. What do you want to know?`;
+    } else {
+      opener = `Hey! Run the evaluation first so I can review your profile, then let's chat.`;
+    }
+    chatHistories[agentId].push({ role: 'assistant', content: opener });
+  }
+
+  renderMsgs(agentId);
+  document.getElementById('chatInput').focus();
+}
+
+function closeChat() {
+  document.getElementById('chatModal').classList.remove('open');
+  chatAgent = null;
+}
+
+function renderMsgs(agentId) {
+  const msgs = chatHistories[agentId] || [];
+  document.getElementById('chatMsgs').innerHTML = msgs.map(m => `
+    <div class="msg ${m.role === 'assistant' ? 'agent-msg' : 'user-msg'} ${m.typing ? 'typing' : ''}">
+      ${escHtml(m.content)}
+    </div>
+  `).join('');
+  const el = document.getElementById('chatMsgs');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendMsg() {
+  if (!chatAgent) return;
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  const key = getKey();
+  if (!key) { alert('Enter your API key first.'); return; }
+
+  const agentId = chatAgent.id;
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+
+  chatHistories[agentId].push({ role: 'user', content: text });
+  chatHistories[agentId].push({ role: 'assistant', content: '…', typing: true });
+  renderMsgs(agentId);
+
+  try {
+    const r = results[agentId];
+    const profileCtx = r && r !== 'loading' && r.confidence > 0
+      ? `\n\nProfile context: You reviewed this person and gave them a ${r.swipe} (${r.confidence}% confidence). Your feedback was: "${r.feedback}" Your advice: "${r.topAdvice}"`
+      : '';
+
+    const chatSystem = `${chatAgent.system}
+
+You are now chatting directly with this person. Stay 100% in character as ${chatAgent.name} — never break character, never mention being an AI.${profileCtx}
+
+Two modes:
+1. If they ask about their profile, give honest, in-character advice.
+2. If they want to simulate a dating app conversation (pretend you matched), play along naturally as ${chatAgent.name} would on a date app.
+
+Keep responses conversational and short (2–4 sentences). Be genuine.`;
+
+    const messages = chatHistories[agentId]
+      .filter(m => !m.typing)
+      .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }));
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
+        system: chatSystem,
+        messages
+      })
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data  = await resp.json();
+    const reply = data.content[0].text;
+
+    chatHistories[agentId] = chatHistories[agentId].filter(m => !m.typing);
+    chatHistories[agentId].push({ role: 'assistant', content: reply });
+
+  } catch (e) {
+    chatHistories[agentId] = chatHistories[agentId].filter(m => !m.typing);
+    chatHistories[agentId].push({ role: 'assistant', content: `(Error: ${e.message})` });
+  }
+
+  renderMsgs(agentId);
+  document.getElementById('sendBtn').disabled = false;
+  input.focus();
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function getKey() {
+  return document.getElementById('apiKeyInput').value.trim()
+    || localStorage.getItem('ant_key') || '';
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('alertBox');
+  el.className = `alert ${type}`;
+  el.textContent = msg;
+}
+function clearAlert() {
+  const el = document.getElementById('alertBox');
+  el.className = 'alert';
+  el.textContent = '';
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
