@@ -480,7 +480,7 @@
       <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
       <button class="btn-save" onclick="saveApiKey()">Save</button>
     </div>
-    <p class="key-hint">Stored in your browser only — never sent anywhere except Anthropic's API.</p>
+    <p class="key-hint">Passed to the local proxy server, which forwards it to Anthropic. Never leaves your machine.</p>
   </div>
 
   <!-- Upload + Bio -->
@@ -772,13 +772,11 @@ async function evalAgent(agent, key) {
       text: `Here is a dating profile to evaluate.\n\nBio: ${document.getElementById('bioInput').value.trim() || '(no bio provided)'}\n\n${photos.length} photo(s) are attached above. Respond with JSON only.`
     };
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
+        'x-api-key': key
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
@@ -1011,13 +1009,11 @@ Keep responses conversational and short (2–4 sentences). Be genuine.`;
       .filter(m => !m.typing)
       .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }));
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
+        'x-api-key': key
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
