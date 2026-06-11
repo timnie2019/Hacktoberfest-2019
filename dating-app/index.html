@@ -691,10 +691,18 @@ let chatHistories = {};  // agentId -> [{role,content}]
 
 // ─── Init ──────────────────────────────────────────────────────────────────────
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const saved = localStorage.getItem('ant_key');
   if (saved) document.getElementById('apiKeyInput').value = saved;
   renderCards();
+
+  // Hide the API key section if the server already has a key configured
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    if (cfg.hasServerKey) {
+      document.querySelector('.section-card').style.display = 'none';
+    }
+  } catch (_) {}
 });
 
 function saveApiKey() {

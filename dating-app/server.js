@@ -1,16 +1,13 @@
-// Dating Profile AI — local proxy server
-// Usage: node server.js
-// Then open: http://localhost:3000
-//
-// Optional: set your API key as env var so you don't have to paste it every time:
-//   ANTHROPIC_API_KEY=sk-ant-... node server.js
+// Dating Profile AI — local + cloud proxy server
+// Local:  node server.js  → http://localhost:3000
+// Cloud:  set ANTHROPIC_API_KEY env var, deploy via Railway/Render/Fly
 
 const http  = require('http');
 const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
 
-const PORT    = 3000;
+const PORT    = process.env.PORT || 3000;
 const ENV_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 http.createServer((req, res) => {
@@ -29,15 +26,24 @@ http.createServer((req, res) => {
     return;
   }
 
+  // Tell the UI whether the server already has a key (so it can hide the key input)
+  if (req.method === 'GET' && req.url === '/api/config') {
+    res.setHeader('Content-Type', 'application/json');
+    res.writeHead(200);
+    res.end(JSON.stringify({ hasServerKey: !!ENV_KEY }));
+    return;
+  }
+
   // Proxy POST /api/chat → Anthropic
   if (req.method === 'POST' && req.url === '/api/chat') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
-      const apiKey = req.headers['x-api-key'] || ENV_KEY;
+      // Server-side key takes priority; fall back to key from UI header
+      const apiKey = ENV_KEY || req.headers['x-api-key'] || '';
       if (!apiKey) {
         res.writeHead(401, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: { message: 'No API key provided. Enter it in the app or set ANTHROPIC_API_KEY env var.' } }));
+        res.end(JSON.stringify({ error: { message: 'No API key. Enter one in the app or set ANTHROPIC_API_KEY on the server.' } }));
         return;
       }
 
@@ -78,9 +84,9 @@ http.createServer((req, res) => {
   console.log(`  Open: http://localhost:${PORT}`);
   console.log('');
   if (ENV_KEY) {
-    console.log('  API key: loaded from ANTHROPIC_API_KEY env var');
+    console.log('  API key: loaded from ANTHROPIC_API_KEY — visitors need no key');
   } else {
-    console.log('  API key: paste it into the app (or restart with ANTHROPIC_API_KEY=sk-ant-...)');
+    console.log('  API key: not set — visitors must enter their own key in the app');
   }
   console.log('');
 });
